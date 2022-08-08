@@ -16,4 +16,3 @@ make
                -e  for encryption
                -d  for decryption
 ```
-
