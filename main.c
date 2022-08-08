@@ -2,13 +2,13 @@
 
 #include "affinehill.h"
 
-#define PRINTERR(str)   \
-  {                     \
-    perror(#str);       \
-    exit(EXIT_FAILURE); \
+#define PRINTERR(str)                                                          \
+  {                                                                            \
+    perror(#str);                                                              \
+    exit(EXIT_FAILURE);                                                        \
   }
 
-#define ERRMSG(exitstatus, format, ...) \
+#define ERRMSG(exitstatus, format, ...)                                        \
   { fprintf(stderr, "[%s:%s] " format " ", __TIME__, __FILE__, ##__VA_ARGS__); }
 
 /*Allow "cc -D" to override definition*/
@@ -36,9 +36,10 @@ static int padding(FILE *stream, int bufsize) {
   size_t numWrite;
   char *padchr = "\0\0\0";
   unsigned short int pad;
-  size_t size = fsize(stream);       // size of file
-  pad = bufsize - (size % bufsize);  // size of pad
-  if (pad == bufsize) return 0;      // no padding required
+  size_t size = fsize(stream);      // size of file
+  pad = bufsize - (size % bufsize); // size of pad
+  if (pad == bufsize)
+    return 0; // no padding required
   numWrite = fwrite(padchr, 1, pad, stream);
   if (!numWrite) {
     perror("write");
@@ -55,8 +56,7 @@ int main(int argc, char *argv[]) {
   if (argc != 5) {
     fprintf(stderr, "%s: missing file operand\n",
             program_invocation_short_name);
-    fprintf(stdout,
-            "Usage: %s [OPTION]... keyfile.txt SOURCE DECT\n\
+    fprintf(stdout, "Usage: %s [OPTION]... keyfile.txt SOURCE DECT\n\
                 -e\t\tfor encryption\n\
                 -d\t\tfor decryption\n",
             program_invocation_short_name);
@@ -73,7 +73,8 @@ int main(int argc, char *argv[]) {
   char cipherName[MAX_LINE];
   size_t size, numRead, numWrite;
 
-  if (mode == ENC) sprintf(cipherName, "%s.enc", argv[4]);
+  if (mode == ENC)
+    sprintf(cipherName, "%s.enc", argv[4]);
 
   FILE *keyfile = fopen(argv[2], "rb");
   if (!keyfile) {
@@ -94,35 +95,42 @@ int main(int argc, char *argv[]) {
   }
 
   for (i = 0; i < ROW; i++)
-    for (j = 0; j < COLUMN; j++) fscanf(keyfile, "%d", &key[i][j]);
+    for (j = 0; j < COLUMN; j++)
+      fscanf(keyfile, "%d", &key[i][j]);
 
-  if (fclose(keyfile)) PRINTERR(close);
+  if (fclose(keyfile))
+    PRINTERR(close);
 
   padding(input_file, BLOCK_SIZE);
-  size = fsize(input_file);   // size of input file
-  block = size / BLOCK_SIZE;  // Number of blocks
+  size = fsize(input_file);  // size of input file
+  block = size / BLOCK_SIZE; // Number of blocks
 
   if (mode == DEC) {
     inverse(key, MOD);
-    for (i = 0; i < BLOCK_SIZE; i++) b[i] = additiveInverse(b[i], MOD);
+    for (i = 0; i < BLOCK_SIZE; i++)
+      b[i] = additiveInverse(b[i], MOD);
   }
   errno = 0;
   start = clock();
   // iteration crypt function for each block
   for (i = 0; i < block; i++) {
     numRead = fread(plainbuf, 1, BLOCK_SIZE, input_file);
-    if (!numRead || errno != 0) PRINTERR(read);
+    if (!numRead || errno != 0)
+      PRINTERR(read);
     crypt(plainbuf, cipherbuf, key, b, mode);
     numWrite = fwrite(cipherbuf, 1, numRead, output_file);
-    if (!numWrite || errno != 0) PRINTERR(write);
+    if (!numWrite || errno != 0)
+      PRINTERR(write);
     if (numWrite != numRead)
       ERRMSG(EXIT_FAILURE, "couldn't write whole buffer\n");
   }
   finish = clock();
   time_taken = (double)(finish - start) / (double)CLOCKS_PER_SEC;
 
-  if (fclose(input_file)) PRINTERR(close);
-  if (fclose(output_file)) PRINTERR(close);
+  if (fclose(input_file))
+    PRINTERR(close);
+  if (fclose(output_file))
+    PRINTERR(close);
   printf("Finished processing. Time taken: %lf seconds.\n", time_taken);
   exit(EXIT_SUCCESS);
 }
@@ -138,12 +146,16 @@ static void crypt(unsigned char *plainbuf, unsigned char *cipherbuf,
   int i, j, sum = 0;
 
   if (mode == DEC)
-    for (i = 0; i < BLOCK_SIZE; i++) plainbuf[i] += b[i];
+    for (i = 0; i < BLOCK_SIZE; i++)
+      plainbuf[i] += b[i];
 
   for (i = 0; i < ROW; i++) {
-    for (j = 0; j < COLUMN; j++) sum = sum + (plainbuf[j] * key[j][i]);
+    for (j = 0; j < COLUMN; j++)
+      sum = sum + (plainbuf[j] * key[j][i]);
     cipherbuf[i] = sum % 256;
-    if (mode == ENC) cipherbuf[i] += b[i];
+    if (mode == ENC)
+      cipherbuf[i] += b[i];
     sum = 0;
   }
 }
+

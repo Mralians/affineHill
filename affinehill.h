@@ -20,4 +20,5 @@ extern long det(int key[ROW][COLUMN * 2]);
 extern int multiplicativeInverse(int m, int a);
 extern int inverse(int a[ROW][COLUMN * 2], int mod);
 extern int additiveInverse(int num, int mod);
-#endif  //  _AHILL_DOT_H
+#endif //  _AHILL_DOT_H
+
